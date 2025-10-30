@@ -1,0 +1,48 @@
+[project]
+name = "fednnunet"
+version = "1.0.0"
+requires-python = ">=3.9"
+description = "FednnUNet is a nnUNet library wrapper for federated image segmentation."
+readme = "readme.md"
+license = { file = "LICENSE" }
+
+
+[build-system]
+requires = ["setuptools>=67.8.0"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.codespell]
+skip = '.git,*.pdf,*.svg'
+
+# ignore-words-list = ''
+[tool.flwr.app]
+publisher = "QuiqVu"
+
+[tool.flwr.app.components]
+serverapp = "fednnunet.server:app"
+clientapp = "fednnunet.client:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 1
+task = "extract_fingerprint"
+# task = "plan_and_preprocess"
+# task = "train"
+
+[tool.flwr.app.config.args]
+device = "cuda"
+dataset_id = '551'
+configuration = "3d_fullres"
+fold = "all"
+trainer = "nnUNetTrainerNoMirroring"
+plan = "resEncM25"
+planner = "nnUNetPlannerResEncM"
+overwrite_target_spacing = "4.5 1.5 1.5"
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 2
+address = "127.0.0.1:9093"
+insecure = true
