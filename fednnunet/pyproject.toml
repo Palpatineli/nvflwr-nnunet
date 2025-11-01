@@ -25,13 +25,13 @@ clientapp = "fednnunet.client:app"
 
 [tool.flwr.app.config]
 num-server-rounds = 1
-task = "extract_fingerprint"
+# task = "extract_fingerprint"
 # task = "plan_and_preprocess"
-# task = "train"
+task = "train"
 
 [tool.flwr.app.config.args]
 device = "cuda"
-dataset_id = '551'
+dataset_id = '550'
 configuration = "3d_fullres"
 fold = "all"
 trainer = "nnUNetTrainerNoMirroring"

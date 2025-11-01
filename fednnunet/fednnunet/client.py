@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import logging
 import os
 from io import BytesIO
-from typing import Literal, cast, final, override
+from typing import Literal, cast
 
 import flwr as fl
 from flwr.client import Client, ClientApp
@@ -95,7 +95,7 @@ def parameters_to_state_dict(parameters: Parameters) -> StateDict:
 Task = Literal["train"] | Literal['plan_and_preprocess'] | Literal['extract_fingerprint']
 Fingerprint = dict[str, list[list[int]] | list[list[float]] | list[float]]
 
-@final
+
 class FlowerClient(fl.client.Client):
     num_samples: int | None = None
     fingerprint: Fingerprint | None = None
@@ -185,7 +185,6 @@ class FlowerClient(fl.client.Client):
 
         return self.fingerprint
 
-    @override
     def get_parameters(self, ins) -> GetParametersRes:
         if self.extract_fingerprint:
             parameters = self.get_fingerprint()
@@ -213,7 +212,6 @@ class FlowerClient(fl.client.Client):
             )
             self.model.load_state_dict(onset_subset_keys_dict, strict=True)
 
-    @override
     def fit(self, ins):
         self.set_parameters(ins.parameters)
 
@@ -247,7 +245,6 @@ class FlowerClient(fl.client.Client):
             )
             return fr
 
-    @override
     def evaluate(self, ins):
         # We need to update to the aggregated parameters, otherwise the model will be evaluated on local weights
         self.set_parameters(ins.parameters)

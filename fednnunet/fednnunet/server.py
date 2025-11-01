@@ -3,7 +3,7 @@ from collections.abc import Sequence
 import os
 from io import BytesIO
 from logging import INFO, WARNING
-from typing import Callable, TypeVar, cast, final, overload, override
+from typing import Callable, TypeVar, cast, overload
 
 import flwr as fl
 import torch
@@ -128,7 +128,6 @@ def aggregate_fingerprints(parameters: list[Parameters]) -> Parameters:
 EvaluationFn = Callable[[int, NDArrays, dict[str, Scalar]], tuple[float, dict[str, Scalar]] | None]
 
 
-@final
 class MyStrategy(fl.server.strategy.FedAvg):
     def __init__(
         self,
@@ -191,7 +190,6 @@ class MyStrategy(fl.server.strategy.FedAvg):
             new_state_dict[key] = torch.mean(torch.stack(keys, dim=0), dim=0)
         return new_state_dict
 
-    @override
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> list[tuple[ClientProxy, FitIns]]:
@@ -240,7 +238,6 @@ class MyStrategy(fl.server.strategy.FedAvg):
     MaybeResults = list[tuple[ClientProxy, fl.common.FitRes] | BaseException]
     GoodResults = list[tuple[ClientProxy, fl.common.FitRes]]
 
-    @override
     def aggregate_fit(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         server_round: int,
