@@ -95,7 +95,6 @@ def parameters_to_state_dict(parameters: Parameters) -> StateDict:
 Task = Literal["train"] | Literal['plan_and_preprocess'] | Literal['extract_fingerprint']
 Fingerprint = dict[str, list[list[int]] | list[list[float]] | list[float]]
 
-
 class FlowerClient(fl.client.Client):
     num_samples: int | None = None
     fingerprint: Fingerprint | None = None
@@ -234,13 +233,17 @@ class FlowerClient(fl.client.Client):
                 logging.error(f"An unexpected error occurred: {e}")
                 raise
 
-            tl = np.round(
-                self.trainer.logger.my_fantastic_logging["train_losses"][-1], decimals=4
-            )
+            print('----====---===---====----')
+            print(self.trainer.logger.my_fantastic_logging)
+            print('----====---===---====----')
+            if len(tls := self.trainer.logger.my_fantastic_logging["train_losses"]) > 0:
+                tl = np.round(tls[-1], decimals=4)
+            else:
+                tl = 0.0000
             fr = FitRes(
                 parameters=self.get_parameters(GetParametersIns({})).parameters,
                 status=Status(code=Code(0), message=""),
-                num_examples=len(cast(NonDetMultiThreadedAugmenter, self.trainer.dataloader_train).generator._data),
+                num_examples=len(cast(NonDetMultiThreadedAugmenter, self.trainer.dataloader_train).generator._data.identifiers),
                 metrics={"loss": float(tl)},
             )
             return fr
@@ -284,20 +287,22 @@ class FlowerClient(fl.client.Client):
                 metrics={},
             )
 
-        vl = np.round(
-            self.trainer.logger.my_fantastic_logging["val_losses"][-1], decimals=4
-        )
-        dc = [
-            np.round(i, decimals=4)
-            for i in self.trainer.logger.my_fantastic_logging[
-                "dice_per_class_or_region"
-            ][-1]
-        ]
+        print('----====---===---====----')
+        print(self.trainer.logger.my_fantastic_logging)
+        print('----====---===---====----')
+        if len(vls := self.trainer.logger.my_fantastic_logging["val_losses"]) > 0:
+            vl = np.round(vls[-1], decimals=4)
+        else:
+            vl = 0.0000
+        if len(dcs := self.trainer.logger.my_fantastic_logging["dice_per_class_or_region"]) > 0:
+            dc = [np.round(i, decimals=4) for i in dcs[-1]]
+        else:
+            dc = 0.0000
 
         er = EvaluateRes(
             status=Status(code=Code(0), message="yacasi"),
             loss=float(vl),
-            num_examples=len(cast(NonDetMultiThreadedAugmenter, self.trainer.dataloader_val).generator._data),
+            num_examples=len(cast(NonDetMultiThreadedAugmenter, self.trainer.dataloader_val).generator._data.identifiers),
             metrics={"fg_dice": float(np.nanmean(dc))},
         )
 

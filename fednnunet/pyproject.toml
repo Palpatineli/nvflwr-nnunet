@@ -24,7 +24,7 @@ serverapp = "fednnunet.server:app"
 clientapp = "fednnunet.client:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 1
+num-server-rounds = 11
 # task = "extract_fingerprint"
 # task = "plan_and_preprocess"
 task = "train"

@@ -9,7 +9,7 @@ import flwr as fl
 import torch
 from flwr.common import Context, FitIns, GetParametersIns, MetricsAggregationFn, NDArrays, Parameters, Scalar
 from flwr.common.logger import log
-from flwr.server import ServerApp, ServerAppComponents, SimpleClientManager
+from flwr.server import ServerApp, ServerAppComponents, ServerConfig, SimpleClientManager
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
@@ -286,8 +286,10 @@ class MyStrategy(fl.server.strategy.FedAvg):
 
 def server_fn(ctx: Context) -> ServerAppComponents:
     task = cast(str, ctx.run_config['task'])
+    num_rounds = int(ctx.run_config['num-server-rounds'])
     strategy = MyStrategy(task)
-    return ServerAppComponents(client_manager=SimpleClientManager(), strategy=strategy)
+    return ServerAppComponents(config=ServerConfig(num_rounds=num_rounds), client_manager=SimpleClientManager(),
+                               strategy=strategy)
 
 app = ServerApp(server_fn=server_fn)
 
