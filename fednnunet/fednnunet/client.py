@@ -8,7 +8,7 @@ from typing import Literal, cast
 import flwr as fl
 from flwr.client import Client, ClientApp
 from flwr.common.typing import GetParametersIns
-from nnunetv2.training.nnUNetTrainer.nnUNetTrainer import NonDetMultiThreadedAugmenter
+from nnunetv2.training.nnUNetTrainer import nnUNetTrainer
 import numpy as np
 import torch
 from flwr.common import Code, Context, EvaluateRes, FitRes, GetParametersRes, Parameters, Status
@@ -26,7 +26,7 @@ from nnunetv2.utilities.dataset_name_id_conversion import (
     maybe_convert_to_dataset_name,
 )
 
-from fednnunet.run_training import run_training, nnUNetTrainer
+from fednnunet.run_training import run_training
 
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
@@ -113,7 +113,7 @@ class FlowerClient(fl.client.Client):
         if self.task == "train":
             self.train = True
             # this calls run_training but is not running any training, I did not change the name of the method for compatibility with regular nnUnet.
-            self.trainer: nnUNetTrainer = run_training(
+            self.trainer: nnUNetTrainer.nnUNetTrainer = run_training(
                 self.dataset_name,
                 self.args.configuration,
                 self.args.fold,
@@ -233,9 +233,6 @@ class FlowerClient(fl.client.Client):
                 logging.error(f"An unexpected error occurred: {e}")
                 raise
 
-            print('----====---===---====----')
-            print(self.trainer.logger.my_fantastic_logging)
-            print('----====---===---====----')
             if len(tls := self.trainer.logger.my_fantastic_logging["train_losses"]) > 0:
                 tl = np.round(tls[-1], decimals=4)
             else:
@@ -243,7 +240,7 @@ class FlowerClient(fl.client.Client):
             fr = FitRes(
                 parameters=self.get_parameters(GetParametersIns({})).parameters,
                 status=Status(code=Code(0), message=""),
-                num_examples=len(cast(NonDetMultiThreadedAugmenter, self.trainer.dataloader_train).generator._data.identifiers),
+                num_examples=len(cast(nnUNetTrainer.NonDetMultiThreadedAugmenter, self.trainer.dataloader_train).generator._data.identifiers),
                 metrics={"loss": float(tl)},
             )
             return fr
@@ -302,7 +299,7 @@ class FlowerClient(fl.client.Client):
         er = EvaluateRes(
             status=Status(code=Code(0), message="yacasi"),
             loss=float(vl),
-            num_examples=len(cast(NonDetMultiThreadedAugmenter, self.trainer.dataloader_val).generator._data.identifiers),
+            num_examples=len(cast(nnUNetTrainer.NonDetMultiThreadedAugmenter, self.trainer.dataloader_val).generator._data.identifiers),
             metrics={"fg_dice": float(np.nanmean(dc))},
         )
 

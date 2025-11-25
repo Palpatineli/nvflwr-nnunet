@@ -24,7 +24,7 @@ serverapp = "fednnunet.server:app"
 clientapp = "fednnunet.client:app"
 
 [tool.flwr.app.config]
-num-server-rounds = 11
+num-server-rounds = 1000
 # task = "extract_fingerprint"
 # task = "plan_and_preprocess"
 task = "train"
@@ -33,6 +33,7 @@ task = "train"
 device = "cuda"
 dataset_id = '550'
 configuration = "3d_fullres"
+is_continue = true
 fold = "all"
 trainer = "nnUNetTrainerNoMirroring"
 plan = "resEncM25"
